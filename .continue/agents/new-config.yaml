@@ -1,0 +1,36 @@
+# Continue Configuration with OpenRouter (FREE)
+name: My OpenRouter Config
+version: 1.0.0
+schema: v1
+
+# Model untuk chat dan coding
+models:
+  # Gemini Flash - Cepat dan gratis
+  - name: Gemini Flash (Free)
+    provider: openrouter
+    model: google/gemini-2.0-flash-thinking-exp:free
+    apiKey: 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
+    
+  # Llama 3.3 70B - Pintar dan gratis
+  - name: Llama 3.3 70B (Free)
+    provider: openrouter
+    model: meta-llama/llama-3.3-70b-instruct:free
+    apiKey: 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
+    
+  # Qwen Coder - Khusus coding, gratis
+  - name: Qwen Coder (Free)
+    provider: openrouter
+    model: qwen/qwen-2.5-coder-32b-instruct:free
+    apiKey: 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
+
+# Model untuk autocomplete (Tab completion)
+tabAutocompleteModel:
+  provider: openrouter
+  model: qwen/qwen-2.5-coder-32b-instruct:free
+  apiKey: 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
+
+# Model untuk embeddings (search dalam code)
+embeddingsProvider:
+  provider: openrouter
+  model: text-embedding-3-small
+  apiKey: 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

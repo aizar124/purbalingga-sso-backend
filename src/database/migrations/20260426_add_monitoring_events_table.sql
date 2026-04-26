@@ -1,0 +1,31 @@
+CREATE TABLE `monitoring_events` (
+  `id` varchar(36) NOT NULL,
+  `eventType` enum(
+    'register_success',
+    'login_success',
+    'login_failed',
+    'token_validate',
+    'activity',
+    'last_active',
+    'users_list',
+    'user_detail',
+    'active_users_list',
+    'active_users_detail'
+  ) NOT NULL,
+  `actorUserId` varchar(255) NULL,
+  `subjectUserId` varchar(255) NULL,
+  `clientId` varchar(255) NULL,
+  `route` varchar(120) NULL,
+  `method` varchar(16) NULL,
+  `success` tinyint NOT NULL DEFAULT 1,
+  `statusCode` int NULL,
+  `ip` varchar(255) NULL,
+  `userAgent` varchar(255) NULL,
+  `metadata` json NULL,
+  `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  INDEX `IDX_28e481d114471fe744791cb79e` (`eventType`),
+  INDEX `IDX_2f9a98ddd2aa3cd09fdbea2aac` (`actorUserId`),
+  INDEX `IDX_906619302f4d9d68eb298e2189` (`subjectUserId`),
+  INDEX `IDX_97a46e197d4293f302be76eff1` (`clientId`),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
