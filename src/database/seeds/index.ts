@@ -3,7 +3,7 @@
  * 
  * Akan membuat:
  * - 1 admin user: admin@purbalingga.id / Admin1234!
- * - 3 OAuth clients: Purbalingga Pay, Web Wisata, Web Monitoring
+ * - 4 OAuth clients: Purbalingga SSO, Purbalingga Pay, Web Wisata, Web Monitoring
  */
 
 import 'reflect-metadata';
@@ -59,11 +59,22 @@ async function seed() {
 
   const clients = [
     {
+      name:         'Purbalingga SSO',
+      clientId:     'purbalingga-sso',
+      clientSecret: 'secret_sso_' + crypto.randomBytes(12).toString('hex'),
+      redirectUris: [
+        'http://localhost:5174/callback',
+        'https://sso.purbalingga.id/callback',
+      ],
+      allowedScopes: ['openid', 'profile', 'email'],
+      description:  'Portal akun Purbalingga SSO',
+    },
+    {
       name:         'Purbalingga Pay',
       clientId:     'purbalingga-pay',
       clientSecret: 'secret_pay_' + crypto.randomBytes(12).toString('hex'),
       redirectUris: [
-        'http://localhost:3000/callback',
+        'http://localhost:5173/callback',
         'https://pay.purbalingga.id/callback',
       ],
       allowedScopes: ['openid', 'profile', 'email'],

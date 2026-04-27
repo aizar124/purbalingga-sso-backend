@@ -77,13 +77,17 @@ CREATE DATABASE purbalingga_sso CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 # Install ts-node jika belum ada
 npm install -g ts-node
 
-# Jalankan seeder — membuat admin user + 3 OAuth clients
+# Jalankan seeder — membuat admin user + 4 OAuth clients
 npx ts-node src/database/seeds/index.ts
 ```
 
 Output contoh:
 ```
 ✅ Admin user dibuat: admin@purbalingga.id / Admin1234!
+✅ Client "Purbalingga SSO" dibuat
+   client_id:     purbalingga-sso
+   client_secret: secret_sso_abc123...
+   ⚠️  Simpan client_secret di atas!
 ✅ Client "Purbalingga Pay" dibuat
    client_id:     purbalingga-pay
    client_secret: secret_pay_abc123...
@@ -132,8 +136,8 @@ curl http://localhost:4000/.well-known/openid-configuration
 ```
 http://localhost:4000/oauth/authorize?
   response_type=code&
-  client_id=purbalingga-pay&
-  redirect_uri=http://localhost:5173/callback&
+  client_id=purbalingga-sso&
+  redirect_uri=http://localhost:5174/callback&
   scope=openid profile email&
   state=random123
 ```
