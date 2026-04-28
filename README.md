@@ -48,6 +48,7 @@ DB_PORT=3306
 DB_NAME=purbalingga_sso
 DB_USER=root
 DB_PASS=
+DB_AUTO_CREATE=true
 
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -66,8 +67,11 @@ FRONTEND_URL=http://localhost:5174
 
 ### 4. Buat Database MySQL
 
+Kalau `DB_AUTO_CREATE=true`, app akan mencoba membuat database ini otomatis saat startup atau saat seeder dijalankan.
+
+Kalau kamu mau buat manual, pakai:
+
 ```sql
--- Di MySQL client (phpMyAdmin / HeidiSQL / terminal)
 CREATE DATABASE purbalingga_sso CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 

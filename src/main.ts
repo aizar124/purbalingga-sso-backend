@@ -5,8 +5,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { ensureDatabaseExists, ensureDefaultOAuthClients } from './database/database-bootstrap';
 
 async function bootstrap() {
+  await ensureDatabaseExists();
+  await ensureDefaultOAuthClients();
+
   const app = await NestFactory.create(AppModule);
 
   // Cookie parser (untuk SSO session cookie)

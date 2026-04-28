@@ -19,6 +19,7 @@ import { User, UserRole } from '../../users/users.entity';
 import { OAuthClient } from '../../clients/clients.entity';
 import { AuthorizationCode } from '../../oauth/authorization-code.entity';
 import { Consent } from '../../oauth/consent.entity';
+import { ensureDatabaseExists } from '../database-bootstrap';
 
 const AppDataSource = new DataSource({
   type: 'mysql',
@@ -32,6 +33,7 @@ const AppDataSource = new DataSource({
 });
 
 async function seed() {
+  await ensureDatabaseExists();
   await AppDataSource.initialize();
   console.log('✅ Database terhubung');
 
@@ -68,6 +70,18 @@ async function seed() {
       ],
       allowedScopes: ['openid', 'profile', 'email'],
       description:  'Portal akun Purbalingga SSO',
+    },
+    {
+      name:         'Purbalingga Smart City',
+      clientId:     'purbalingga-smart-city',
+      clientSecret: 'secret_smart_city_8f3b2c91d4a6',
+      redirectUris: [
+        'http://localhost:8000/auth/sso/callback',
+        'http://localhost:8000/api/auth/sso/callback',
+        'https://smartcity.purbalingga.id/auth/sso/callback',
+      ],
+      allowedScopes: ['openid', 'profile', 'email'],
+      description:  'Portal Smart City Purbalingga',
     },
     {
       name:         'Purbalingga Pay',

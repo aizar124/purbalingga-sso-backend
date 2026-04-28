@@ -12,12 +12,14 @@ import { AuthorizationCode } from './oauth/authorization-code.entity';
 import { Consent } from './oauth/consent.entity';
 import { MonitoringEvent } from './monitoring/monitoring-event.entity';
 
+const DEFAULT_DB_HOST = 'localhost';
+
 @Module({
   imports: [
     // Database TypeORM + MySQL
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || DEFAULT_DB_HOST,
       port: parseInt(process.env.DB_PORT) || 3306,
       username: process.env.DB_USER || 'root',
       password: process.env.DB_PASS || '',
