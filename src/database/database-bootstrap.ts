@@ -145,6 +145,8 @@ const DEFAULT_SMART_CITY_CLIENT = {
   redirectUris: [
     'http://localhost:8000/auth/sso/callback',
     'http://localhost:8000/api/auth/sso/callback',
+    'http://41.216.191.37:8000/auth/sso/callback',
+    'http://41.216.191.37:8000/api/auth/sso/callback',
     'http://41.216.191.39:8000/auth/sso/callback',
     'http://41.216.191.39:8000/api/auth/sso/callback',
     'https://smartcity.purbalingga.id/auth/sso/callback',
@@ -185,6 +187,7 @@ const DEFAULT_WISATA_CLIENT = {
   clientSecret: 'secret_wisata_59fbcd20530fa5f3f24965ee',
   redirectUris: [
     'http://localhost:3001/callback',
+    'http://41.216.191.37:3001/callback',
     'http://41.216.191.39:3001/callback',
     'https://wisata.purbalingga.id/callback',
   ],
