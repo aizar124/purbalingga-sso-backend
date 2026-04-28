@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { OAuthModule } from './oauth/oauth.module';
 import { UsersModule } from './users/users.module';
@@ -15,6 +16,7 @@ import { MonitoringEvent } from './monitoring/monitoring-event.entity';
 const DEFAULT_DB_HOST = 'localhost';
 
 @Module({
+  controllers: [AppController],
   imports: [
     // Database TypeORM + MySQL
     TypeOrmModule.forRoot({
