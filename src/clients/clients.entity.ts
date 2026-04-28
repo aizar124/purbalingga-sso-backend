@@ -19,7 +19,7 @@ export class OAuthClient {
   redirectUris: string[];
 
   // Scope yang diizinkan (JSON array)
-  @Column({ type: 'json', default: '["openid","profile","email"]' })
+  @Column({ type: 'json' })
   allowedScopes: string[];
 
   @Column({ nullable: true })
