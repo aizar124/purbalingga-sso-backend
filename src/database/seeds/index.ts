@@ -63,7 +63,7 @@ async function seed() {
     {
       name:         'Purbalingga SSO',
       clientId:     'purbalingga-sso',
-      clientSecret: 'secret_sso_' + crypto.randomBytes(12).toString('hex'),
+      clientSecret: 'secret_sso_d26c259726e600a2bf28b4ea',
       redirectUris: [
         'http://localhost:5174/callback',
         'http://41.216.191.39:5174/callback',
@@ -89,7 +89,7 @@ async function seed() {
     {
       name:         'Purbalingga Pay',
       clientId:     'purbalingga-pay',
-      clientSecret: 'secret_pay_' + crypto.randomBytes(12).toString('hex'),
+      clientSecret: 'secret_pay_9ee5d4b6501e7c223ed6c9bb',
       redirectUris: [
         'http://localhost:5173/callback',
         'http://41.216.191.39:5173/callback',
@@ -101,7 +101,7 @@ async function seed() {
     {
       name:         'Web Wisata Purbalingga',
       clientId:     'purbalingga-wisata',
-      clientSecret: 'secret_wisata_' + crypto.randomBytes(12).toString('hex'),
+      clientSecret: 'secret_wisata_59fbcd20530fa5f3f24965ee',
       redirectUris: [
         'http://localhost:3001/callback',
         'http://41.216.191.39:3001/callback',
@@ -113,7 +113,7 @@ async function seed() {
     {
       name:         'Web Monitoring',
       clientId:     'purbalingga-monitoring',
-      clientSecret: 'secret_monitor_' + crypto.randomBytes(12).toString('hex'),
+      clientSecret: 'secret_monitor_2369a41df09416b1dba1b5a7',
       redirectUris: [
         'http://localhost:3002/callback',
         'http://41.216.191.39:3002/callback',

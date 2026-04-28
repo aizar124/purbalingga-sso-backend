@@ -122,6 +122,54 @@ const DEFAULT_SMART_CITY_CLIENT = {
     allowedScopes: ['openid', 'profile', 'email'],
     description: 'Portal Smart City Purbalingga',
 };
+const DEFAULT_SSO_CLIENT = {
+    name: 'Purbalingga SSO',
+    clientId: 'purbalingga-sso',
+    clientSecret: 'secret_sso_d26c259726e600a2bf28b4ea',
+    redirectUris: [
+        'http://localhost:5174/callback',
+        'http://41.216.191.39:5174/callback',
+        'https://sso.purbalingga.id/callback',
+    ],
+    allowedScopes: ['openid', 'profile', 'email'],
+    description: 'Portal akun Purbalingga SSO',
+};
+const DEFAULT_PAY_CLIENT = {
+    name: 'Purbalingga Pay',
+    clientId: 'purbalingga-pay',
+    clientSecret: 'secret_pay_9ee5d4b6501e7c223ed6c9bb',
+    redirectUris: [
+        'http://localhost:5173/callback',
+        'http://41.216.191.39:5173/callback',
+        'https://pay.purbalingga.id/callback',
+    ],
+    allowedScopes: ['openid', 'profile', 'email'],
+    description: 'Aplikasi pembayaran digital Purbalingga',
+};
+const DEFAULT_WISATA_CLIENT = {
+    name: 'Web Wisata Purbalingga',
+    clientId: 'purbalingga-wisata',
+    clientSecret: 'secret_wisata_59fbcd20530fa5f3f24965ee',
+    redirectUris: [
+        'http://localhost:3001/callback',
+        'http://41.216.191.39:3001/callback',
+        'https://wisata.purbalingga.id/callback',
+    ],
+    allowedScopes: ['openid', 'profile', 'email'],
+    description: 'Portal wisata Kabupaten Purbalingga',
+};
+const DEFAULT_MONITORING_CLIENT = {
+    name: 'Web Monitoring',
+    clientId: 'purbalingga-monitoring',
+    clientSecret: 'secret_monitor_2369a41df09416b1dba1b5a7',
+    redirectUris: [
+        'http://localhost:3002/callback',
+        'http://41.216.191.39:3002/callback',
+        'https://monitoring.purbalingga.id/callback',
+    ],
+    allowedScopes: ['openid', 'profile', 'email'],
+    description: 'Dashboard monitoring & analytics Smart City',
+};
 async function ensureDefaultOAuthClients() {
     if (!shouldAutoCreateDatabase()) {
         return;
@@ -144,19 +192,28 @@ async function ensureDefaultOAuthClients() {
     await dataSource.initialize();
     try {
         const repo = dataSource.getRepository(clients_entity_1.OAuthClient);
-        const existing = await repo.findOne({ where: { clientId: DEFAULT_SMART_CITY_CLIENT.clientId } });
-        if (!existing) {
-            await repo.save(DEFAULT_SMART_CITY_CLIENT);
-            console.log(`✅ OAuth client siap: ${DEFAULT_SMART_CITY_CLIENT.clientId}`);
-            return;
-        }
-        const nextRedirectUris = JSON.stringify(existing.redirectUris) !== JSON.stringify(DEFAULT_SMART_CITY_CLIENT.redirectUris);
-        const nextSecret = existing.clientSecret !== DEFAULT_SMART_CITY_CLIENT.clientSecret;
-        const nextName = existing.name !== DEFAULT_SMART_CITY_CLIENT.name;
-        const nextDescription = existing.description !== DEFAULT_SMART_CITY_CLIENT.description;
-        if (nextRedirectUris || nextSecret || nextName || nextDescription) {
-            await repo.update({ clientId: DEFAULT_SMART_CITY_CLIENT.clientId }, DEFAULT_SMART_CITY_CLIENT);
-            console.log(`✅ OAuth client diperbarui: ${DEFAULT_SMART_CITY_CLIENT.clientId}`);
+        const clients = [
+            DEFAULT_SSO_CLIENT,
+            DEFAULT_SMART_CITY_CLIENT,
+            DEFAULT_PAY_CLIENT,
+            DEFAULT_WISATA_CLIENT,
+            DEFAULT_MONITORING_CLIENT,
+        ];
+        for (const client of clients) {
+            const existing = await repo.findOne({ where: { clientId: client.clientId } });
+            if (!existing) {
+                await repo.save(client);
+                console.log(`✅ OAuth client siap: ${client.clientId}`);
+                continue;
+            }
+            const nextRedirectUris = JSON.stringify(existing.redirectUris) !== JSON.stringify(client.redirectUris);
+            const nextSecret = existing.clientSecret !== client.clientSecret;
+            const nextName = existing.name !== client.name;
+            const nextDescription = existing.description !== client.description;
+            if (nextRedirectUris || nextSecret || nextName || nextDescription) {
+                await repo.update({ clientId: client.clientId }, client);
+                console.log(`✅ OAuth client diperbarui: ${client.clientId}`);
+            }
         }
     }
     finally {
