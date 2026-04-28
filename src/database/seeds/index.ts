@@ -66,6 +66,7 @@ async function seed() {
       clientSecret: 'secret_sso_' + crypto.randomBytes(12).toString('hex'),
       redirectUris: [
         'http://localhost:5174/callback',
+        'http://41.216.191.39:5174/callback',
         'https://sso.purbalingga.id/callback',
       ],
       allowedScopes: ['openid', 'profile', 'email'],
@@ -78,6 +79,8 @@ async function seed() {
       redirectUris: [
         'http://localhost:8000/auth/sso/callback',
         'http://localhost:8000/api/auth/sso/callback',
+        'http://41.216.191.39:8000/auth/sso/callback',
+        'http://41.216.191.39:8000/api/auth/sso/callback',
         'https://smartcity.purbalingga.id/auth/sso/callback',
       ],
       allowedScopes: ['openid', 'profile', 'email'],
@@ -89,6 +92,7 @@ async function seed() {
       clientSecret: 'secret_pay_' + crypto.randomBytes(12).toString('hex'),
       redirectUris: [
         'http://localhost:5173/callback',
+        'http://41.216.191.39:5173/callback',
         'https://pay.purbalingga.id/callback',
       ],
       allowedScopes: ['openid', 'profile', 'email'],
@@ -100,6 +104,7 @@ async function seed() {
       clientSecret: 'secret_wisata_' + crypto.randomBytes(12).toString('hex'),
       redirectUris: [
         'http://localhost:3001/callback',
+        'http://41.216.191.39:3001/callback',
         'https://wisata.purbalingga.id/callback',
       ],
       allowedScopes: ['openid', 'profile', 'email'],
@@ -111,6 +116,7 @@ async function seed() {
       clientSecret: 'secret_monitor_' + crypto.randomBytes(12).toString('hex'),
       redirectUris: [
         'http://localhost:3002/callback',
+        'http://41.216.191.39:3002/callback',
         'https://monitoring.purbalingga.id/callback',
       ],
       allowedScopes: ['openid', 'profile', 'email'],

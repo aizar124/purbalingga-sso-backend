@@ -8,7 +8,9 @@ const cookieParser = require("cookie-parser");
 const app_module_1 = require("./app.module");
 const database_bootstrap_1 = require("./database/database-bootstrap");
 async function bootstrap() {
-    await (0, database_bootstrap_1.ensureDatabaseExists)();
+    if (process.env.DB_AUTO_MIGRATE !== 'false') {
+        await (0, database_bootstrap_1.runDatabaseMigrations)();
+    }
     await (0, database_bootstrap_1.ensureDefaultOAuthClients)();
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use(cookieParser());
@@ -47,8 +49,9 @@ async function bootstrap() {
     console.log(`🌐 CORS origins: ${allowedOrigins.join(', ')}`);
     const port = process.env.PORT || 4000;
     await app.listen(port);
-    console.log(`🚀 Purbalingga SSO Server berjalan di http://localhost:${port}`);
-    console.log(`📄 OIDC Discovery: http://localhost:${port}/.well-known/openid-configuration`);
+    const publicBaseUrl = process.env.SSO_BASE_URL || `http://localhost:${port}`;
+    console.log(`🚀 Purbalingga SSO Server berjalan di ${publicBaseUrl}`);
+    console.log(`📄 OIDC Discovery: ${publicBaseUrl}/.well-known/openid-configuration`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

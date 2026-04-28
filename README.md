@@ -49,6 +49,7 @@ DB_NAME=purbalingga_sso
 DB_USER=root
 DB_PASS=
 DB_AUTO_CREATE=true
+DB_AUTO_MIGRATE=true
 
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -61,13 +62,15 @@ JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
 <isi dari public.pem>
 -----END PUBLIC KEY-----"
 
-SSO_BASE_URL=http://localhost:4000
-FRONTEND_URL=http://localhost:5174
+SSO_BASE_URL=http://41.216.191.39:4000
+FRONTEND_URL=http://41.216.191.39:5174
 ```
 
 ### 4. Buat Database MySQL
 
 Kalau `DB_AUTO_CREATE=true`, app akan mencoba membuat database ini otomatis saat startup atau saat seeder dijalankan.
+
+Kalau `DB_AUTO_MIGRATE=true`, app juga akan menjalankan semua migrasi SQL di `src/database/migrations/` saat startup. Ini berguna untuk VPS kosong karena tabel akan dibuat otomatis sebelum app jalan.
 
 Kalau kamu mau buat manual, pakai:
 
@@ -100,7 +103,22 @@ Output contoh:
 
 **PENTING:** Catat client_secret karena hanya muncul sekali saat seeder.
 
-### 6. Jalankan Server
+### 6. Jalankan Migrasi Manual
+
+Kalau kamu mau menjalankan migrasi tanpa start app, pakai:
+
+```bash
+npm run migration:run
+```
+
+Migrasi ini akan:
+
+- membuat database kalau belum ada
+- membuat tabel inti SSO
+- menambahkan tabel monitoring dan field profile
+- mencatat migrasi yang sudah pernah dijalankan supaya aman di-run ulang
+
+### 7. Jalankan Server
 
 ```bash
 # Development (hot reload)
@@ -111,7 +129,7 @@ npm run build
 npm run start
 ```
 
-Server berjalan di: **http://localhost:4000**
+Server berjalan di: **http://41.216.191.39:4000**
 
 ---
 
@@ -119,29 +137,29 @@ Server berjalan di: **http://localhost:4000**
 
 ### Register user baru
 ```bash
-curl -X POST http://localhost:4000/auth/register \
+curl -X POST http://41.216.191.39:4000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"budi@example.com","password":"Password123!","name":"Budi"}'
 ```
 
 ### Login
 ```bash
-curl -X POST http://localhost:4000/auth/login \
+curl -X POST http://41.216.191.39:4000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@purbalingga.id","password":"Admin1234!"}'
 ```
 
 ### OIDC Discovery
 ```bash
-curl http://localhost:4000/.well-known/openid-configuration
+curl http://41.216.191.39:4000/.well-known/openid-configuration
 ```
 
 ### OAuth2 Authorize (buka di browser)
 ```
-http://localhost:4000/oauth/authorize?
+http://41.216.191.39:4000/oauth/authorize?
   response_type=code&
   client_id=purbalingga-sso&
-  redirect_uri=http://localhost:5174/callback&
+  redirect_uri=http://41.216.191.39:5174/callback&
   scope=openid profile email&
   state=random123
 ```

@@ -1,4 +1,7 @@
 import * as mysql from 'mysql2/promise';
+import type { RowDataPacket } from 'mysql2/promise';
+import { promises as fs } from 'fs';
+import * as path from 'path';
 import { DataSource } from 'typeorm';
 import { OAuthClient } from '../clients/clients.entity';
 
@@ -14,6 +17,84 @@ export interface DatabaseBootstrapOptions {
 
 function shouldAutoCreateDatabase(): boolean {
   return process.env.DB_AUTO_CREATE !== 'false';
+}
+
+function shouldAutoMigrate(): boolean {
+  return process.env.DB_AUTO_MIGRATE !== 'false';
+}
+
+export async function runDatabaseMigrations(): Promise<void> {
+  if (!shouldAutoMigrate()) {
+    return;
+  }
+
+  await ensureDatabaseExists();
+
+  const host = process.env.DB_HOST || 'localhost';
+  const port = parseInt(process.env.DB_PORT || '3306', 10);
+  const user = process.env.DB_USER || 'root';
+  const password = process.env.DB_PASS || '';
+  const database = process.env.DB_NAME || 'purbalingga_sso';
+
+  const migrationsDir = path.join(__dirname, 'migrations');
+  const migrationFiles = (await fs.readdir(migrationsDir))
+    .filter((file) => file.endsWith('.sql'))
+    .sort();
+
+  if (!migrationFiles.length) {
+    console.log('ℹ️  Tidak ada file migrasi SQL yang ditemukan');
+    return;
+  }
+
+  const connection = await mysql.createConnection({
+    host,
+    port,
+    user,
+    password,
+    database,
+    multipleStatements: true,
+  });
+
+  try {
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS app_migrations (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        migration_name VARCHAR(255) NOT NULL UNIQUE,
+        executed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    const [rows] = await connection.query<RowDataPacket[]>(
+      'SELECT migration_name FROM app_migrations ORDER BY migration_name ASC',
+    );
+    const applied = new Set(rows.map((row) => String(row.migration_name)));
+
+    for (const file of migrationFiles) {
+      if (applied.has(file)) {
+        console.log(`↩️  Migrasi dilewati: ${file}`);
+        continue;
+      }
+
+      const filePath = path.join(migrationsDir, file);
+      const sql = await fs.readFile(filePath, 'utf8');
+
+      await connection.beginTransaction();
+      try {
+        await connection.query(sql);
+        await connection.query(
+          'INSERT INTO app_migrations (migration_name) VALUES (?)',
+          [file],
+        );
+        await connection.commit();
+        console.log(`✅ Migrasi dijalankan: ${file}`);
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      }
+    }
+  } finally {
+    await connection.end();
+  }
 }
 
 export async function ensureDatabaseExists(
@@ -64,6 +145,8 @@ const DEFAULT_SMART_CITY_CLIENT = {
   redirectUris: [
     'http://localhost:8000/auth/sso/callback',
     'http://localhost:8000/api/auth/sso/callback',
+    'http://41.216.191.39:8000/auth/sso/callback',
+    'http://41.216.191.39:8000/api/auth/sso/callback',
     'https://smartcity.purbalingga.id/auth/sso/callback',
   ],
   allowedScopes: ['openid', 'profile', 'email'],

@@ -5,10 +5,16 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { ensureDatabaseExists, ensureDefaultOAuthClients } from './database/database-bootstrap';
+import {
+  ensureDefaultOAuthClients,
+  runDatabaseMigrations,
+} from './database/database-bootstrap';
 
 async function bootstrap() {
-  await ensureDatabaseExists();
+  if (process.env.DB_AUTO_MIGRATE !== 'false') {
+    await runDatabaseMigrations();
+  }
+
   await ensureDefaultOAuthClients();
 
   const app = await NestFactory.create(AppModule);
@@ -69,8 +75,9 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   await app.listen(port);
 
-  console.log(`🚀 Purbalingga SSO Server berjalan di http://localhost:${port}`);
-  console.log(`📄 OIDC Discovery: http://localhost:${port}/.well-known/openid-configuration`);
+  const publicBaseUrl = process.env.SSO_BASE_URL || `http://localhost:${port}`;
+  console.log(`🚀 Purbalingga SSO Server berjalan di ${publicBaseUrl}`);
+  console.log(`📄 OIDC Discovery: ${publicBaseUrl}/.well-known/openid-configuration`);
 }
 
 bootstrap();
