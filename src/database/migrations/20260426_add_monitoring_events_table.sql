@@ -1,4 +1,4 @@
-CREATE TABLE `monitoring_events` (
+CREATE TABLE IF NOT EXISTS `monitoring_events` (
   `id` varchar(36) NOT NULL,
   `eventType` enum(
     'register_success',
