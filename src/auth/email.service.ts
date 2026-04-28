@@ -18,13 +18,21 @@ export class EmailService {
     });
   }
 
+  private getSsoBaseUrl(): string {
+    return process.env.SSO_BASE_URL || 'http://41.216.191.39:4000';
+  }
+
+  private getFrontendUrl(): string {
+    return process.env.FRONTEND_URL || 'http://41.216.191.39:5174';
+  }
+
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     if (!this.mailEnabled) {
       console.warn(`SMTP belum dikonfigurasi, skip verification email untuk ${email}`);
       return;
     }
 
-    const verifyUrl = `${process.env.SSO_BASE_URL}/auth/verify-email?token=${token}`;
+    const verifyUrl = `${this.getSsoBaseUrl()}/auth/verify-email?token=${token}`;
 
     await this.transporter.sendMail({
       from: process.env.SMTP_FROM || 'noreply@purbalingga.id',
@@ -56,7 +64,7 @@ export class EmailService {
       return;
     }
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetUrl = `${this.getFrontendUrl()}/reset-password?token=${token}`;
 
     await this.transporter.sendMail({
       from: process.env.SMTP_FROM || 'noreply@purbalingga.id',
