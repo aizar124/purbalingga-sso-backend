@@ -62,8 +62,8 @@ JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
 <isi dari public.pem>
 -----END PUBLIC KEY-----"
 
-SSO_BASE_URL=http://41.216.191.39:4000
-FRONTEND_URL=http://41.216.191.39:5174
+SSO_BASE_URL=http://localhost:4000
+FRONTEND_URL=http://localhost:5174
 ```
 
 ### 4. Buat Database MySQL
@@ -129,7 +129,7 @@ npm run build
 npm run start
 ```
 
-Server berjalan di: **http://41.216.191.39:4000**
+Server berjalan di: **http://localhost:4000**
 
 ---
 
@@ -137,29 +137,29 @@ Server berjalan di: **http://41.216.191.39:4000**
 
 ### Register user baru
 ```bash
-curl -X POST http://41.216.191.39:4000/auth/register \
+curl -X POST http://localhost:4000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"budi@example.com","password":"Password123!","name":"Budi"}'
 ```
 
 ### Login
 ```bash
-curl -X POST http://41.216.191.39:4000/auth/login \
+curl -X POST http://localhost:4000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@purbalingga.id","password":"Admin1234!"}'
 ```
 
 ### OIDC Discovery
 ```bash
-curl http://41.216.191.39:4000/.well-known/openid-configuration
+curl http://localhost:4000/.well-known/openid-configuration
 ```
 
 ### OAuth2 Authorize (buka di browser)
 ```
-http://41.216.191.39:4000/oauth/authorize?
+http://localhost:4000/oauth/authorize?
   response_type=code&
   client_id=purbalingga-sso&
-  redirect_uri=http://41.216.191.39:5174/callback&
+  redirect_uri=http://localhost:5174/callback&
   scope=openid profile email&
   state=random123
 ```

@@ -26,7 +26,7 @@ export class TokenService {
       role:      user.role,
       scopes,
       client_id: client.clientId,
-      iss:       process.env.SSO_BASE_URL || 'http://localhost:4000',
+      iss:       process.env.SSO_BASE_URL || 'http://41.216.191.39:4000',
       aud:       client.clientId,
       jti:       uuidv4(), // JWT ID unik, bisa dipakai untuk revocation
     };
@@ -49,7 +49,7 @@ export class TokenService {
       picture: user.avatarUrl,
       role:    user.role,
       nonce,
-      iss:     process.env.SSO_BASE_URL || 'http://localhost:4000',
+      iss:     process.env.SSO_BASE_URL || 'http://41.216.191.39:4000',
       aud:     client.clientId,
     };
 

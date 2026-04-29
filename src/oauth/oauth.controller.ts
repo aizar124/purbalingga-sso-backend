@@ -235,7 +235,7 @@ export class OAuthController {
   // ─── GET /.well-known/openid-configuration ─────────────────────────────────
   @Get('.well-known/openid-configuration')
   oidcDiscovery() {
-    const base = process.env.SSO_BASE_URL || 'http://localhost:4000';
+    const base = process.env.SSO_BASE_URL || 'http://41.216.191.39:4000';
     return {
       issuer:                                base,
       authorization_endpoint:               `${base}/oauth/authorize`,

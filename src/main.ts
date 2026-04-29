@@ -53,7 +53,11 @@ async function bootstrap() {
 
   const allowedOrigins = corsOrigins.length
     ? corsOrigins
-    : ['http://localhost:5173', 'http://localhost:5174'];
+    : [
+        'http://41.216.191.37:5173',
+        'http://41.216.191.39:5173',
+        'http://41.216.191.39:5174',
+      ];
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -75,7 +79,7 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   await app.listen(port);
 
-  const publicBaseUrl = process.env.SSO_BASE_URL || `http://localhost:${port}`;
+  const publicBaseUrl = process.env.SSO_BASE_URL || `http://41.216.191.39:${port}`;
   console.log(`🚀 Purbalingga SSO Server berjalan di ${publicBaseUrl}`);
   console.log(`📄 OIDC Discovery: ${publicBaseUrl}/.well-known/openid-configuration`);
 }
