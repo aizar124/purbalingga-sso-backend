@@ -5,7 +5,7 @@ import { Response } from 'express';
 export class AppController {
   @Get()
   home(@Res() res: Response) {
-    const baseUrl = process.env.SSO_BASE_URL || `http://41.216.191.39:${process.env.PORT || 4000}`;
+    const baseUrl = process.env.SSO_BASE_URL || 'https://apisso.qode.my.id';
 
     return res
       .status(200)

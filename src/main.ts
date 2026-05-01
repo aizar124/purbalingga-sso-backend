@@ -54,9 +54,9 @@ async function bootstrap() {
   const allowedOrigins = corsOrigins.length
     ? corsOrigins
     : [
-        'http://41.216.191.37:5173',
-        'http://41.216.191.39:5173',
-        'http://41.216.191.39:5174',
+        'https://smartpay.qode.my.id',
+        'https://sso.qode.my.id',
+        'https://smartcity.qode.my.id',
       ];
 
   app.enableCors({
@@ -79,7 +79,7 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   await app.listen(port);
 
-  const publicBaseUrl = process.env.SSO_BASE_URL || `http://41.216.191.39:${port}`;
+  const publicBaseUrl = process.env.SSO_BASE_URL || `https://apisso.qode.my.id`;
   console.log(`🚀 Purbalingga SSO Server berjalan di ${publicBaseUrl}`);
   console.log(`📄 OIDC Discovery: ${publicBaseUrl}/.well-known/openid-configuration`);
 }

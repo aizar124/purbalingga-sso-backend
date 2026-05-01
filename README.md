@@ -62,8 +62,8 @@ JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
 <isi dari public.pem>
 -----END PUBLIC KEY-----"
 
-SSO_BASE_URL=http://localhost:4000
-FRONTEND_URL=http://localhost:5174
+SSO_BASE_URL=https://apisso.qode.my.id
+FRONTEND_URL=https://sso.qode.my.id
 ```
 
 ### 4. Buat Database MySQL
@@ -129,7 +129,7 @@ npm run build
 npm run start
 ```
 
-Server berjalan di: **http://localhost:4000**
+Server berjalan di: **https://apisso.qode.my.id**
 
 ---
 
@@ -137,29 +137,29 @@ Server berjalan di: **http://localhost:4000**
 
 ### Register user baru
 ```bash
-curl -X POST http://localhost:4000/auth/register \
+curl -X POST https://apisso.qode.my.id/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"budi@example.com","password":"Password123!","name":"Budi"}'
 ```
 
 ### Login
 ```bash
-curl -X POST http://localhost:4000/auth/login \
+curl -X POST https://apisso.qode.my.id/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@purbalingga.id","password":"Admin1234!"}'
 ```
 
 ### OIDC Discovery
 ```bash
-curl http://localhost:4000/.well-known/openid-configuration
+curl https://apisso.qode.my.id/.well-known/openid-configuration
 ```
 
 ### OAuth2 Authorize (buka di browser)
 ```
-http://localhost:4000/oauth/authorize?
+https://apisso.qode.my.id/oauth/authorize?
   response_type=code&
   client_id=purbalingga-sso&
-  redirect_uri=http://localhost:5174/callback&
+  redirect_uri=https://sso.qode.my.id/callback&
   scope=openid profile email&
   state=random123
 ```

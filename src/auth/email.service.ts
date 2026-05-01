@@ -19,11 +19,11 @@ export class EmailService {
   }
 
   private getSsoBaseUrl(): string {
-    return process.env.SSO_BASE_URL || 'http://41.216.191.39:4000';
+    return process.env.SSO_BASE_URL || 'https://apisso.qode.my.id';
   }
 
   private getFrontendUrl(): string {
-    return process.env.FRONTEND_URL || 'http://41.216.191.39:5174';
+    return process.env.FRONTEND_URL || 'https://sso.qode.my.id';
   }
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
