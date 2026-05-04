@@ -213,6 +213,13 @@ https://apisso.qode.my.id/oauth/authorize?
 | GET | `/api/active-users` | List user yang sedang aktif | `{ total: number, items: array }` | `{ "total": 1, "items": [] }` |
 | GET | `/api/active-users/detail` | Detail active users termasuk sesi | `{ total: number, items: array }` | `{ "total": 1, "items": [] }` |
 
+### Response tambahan untuk dashboard akun
+
+- `GET /oauth/userinfo` sekarang menyertakan `lastLoginAt` dan `lastActiveAt`.
+- `GET /sessions` mengembalikan `{ sessions, total, currentSessionId, lastLoginAt, lastActiveAt, latestSessionId }`.
+- `GET /consent` mengembalikan nama aplikasi melalui `clientName` agar daftar aplikasi terhubung lebih mudah dibaca.
+- Setiap token exchange yang sukses akan menyimpan consent ke tabel `consents`.
+
 ---
 
 ## Dengan Docker (MySQL + Redis)

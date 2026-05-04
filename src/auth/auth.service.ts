@@ -79,6 +79,15 @@ export class AuthService {
       userAgent: meta.userAgent,
     });
 
+    await this.sessionsService.markLastActive(user.id, Date.now(), {
+      clientId: undefined,
+      metadata: {
+        event: 'login',
+        ip: meta.ip,
+        userAgent: meta.userAgent,
+      },
+    });
+
     await this.monitoringService.recordLoginSuccess(user, meta);
 
     return { mfaRequired: false, sessionId };
@@ -143,6 +152,14 @@ export class AuthService {
       role: user.role,
       createdAt: Date.now(),
       ...meta,
+    });
+
+    await this.sessionsService.markLastActive(user.id, Date.now(), {
+      metadata: {
+        event: 'mfa_login',
+        ip: meta.ip,
+        userAgent: meta.userAgent,
+      },
     });
 
     await this.monitoringService.recordLoginSuccess(user, meta, {

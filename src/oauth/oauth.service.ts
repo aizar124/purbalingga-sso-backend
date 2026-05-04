@@ -154,6 +154,8 @@ export class OAuthService {
       this.tokenService.generateRefreshToken(user.id, client.clientId),
     ]);
 
+    await this.saveConsent(user.id, client.clientId, authCode.scopes);
+
     // 7. Hapus auth code (single-use)
     await this.authCodeRepo.delete({ code: body.code });
 
@@ -191,6 +193,23 @@ export class OAuthService {
 
   // ─── Ambil list consent user (untuk halaman dashboard akun) ───────────────
   async getUserConsents(userId: string) {
-    return this.consentRepo.find({ where: { userId } });
+    const consents = await this.consentRepo.find({
+      where: { userId },
+      order: { grantedAt: 'DESC' },
+    });
+
+    const enriched = await Promise.all(
+      consents.map(async (consent) => {
+        const client = await this.clientsService.findByClientId(consent.clientId);
+        return {
+          ...consent,
+          clientName: client?.name || consent.clientId,
+          logoUrl: client?.logoUrl || null,
+          description: client?.description || null,
+        };
+      }),
+    );
+
+    return enriched;
   }
 }

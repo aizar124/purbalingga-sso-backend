@@ -11,6 +11,16 @@ export interface SsoSession {
   ip?: string;
 }
 
+export interface SessionOverview extends SsoSession {
+  sessionId: string;
+  isCurrent: boolean;
+  deviceName: string;
+  browser: string;
+  platform: string;
+  location?: string;
+  lastActiveAt?: number;
+}
+
 @Injectable()
 export class SessionsService implements OnModuleInit, OnModuleDestroy {
   private redis: Redis;
@@ -94,6 +104,66 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
       if (data) sessions.push({ ...data, sessionId });
     }
     return sessions;
+  }
+
+  private describeUserAgent(userAgent?: string) {
+    const ua = userAgent || '';
+    const browser =
+      ua.includes('Chrome')
+        ? 'Chrome'
+        : ua.includes('Firefox')
+          ? 'Firefox'
+          : ua.includes('Safari') && !ua.includes('Chrome')
+            ? 'Safari'
+            : ua.includes('Edg')
+              ? 'Edge'
+              : 'Browser tidak dikenali';
+    const platform =
+      ua.includes('Windows')
+        ? 'Windows'
+        : ua.includes('Mac OS') || ua.includes('Macintosh')
+          ? 'macOS'
+          : ua.includes('Android')
+            ? 'Android'
+            : ua.includes('iPhone') || ua.includes('iPad')
+              ? 'iOS'
+              : ua.includes('Linux')
+                ? 'Linux'
+                : 'Platform tidak dikenali';
+
+    return {
+      browser,
+      platform,
+      deviceName: `${browser} on ${platform}`,
+    };
+  }
+
+  async listUserSessionOverview(userId: string, currentSessionId?: string): Promise<SessionOverview[]> {
+    const sessionIds = await this.redis.smembers(this.USER_SESSIONS + userId);
+    const lastActive = await this.getLastActive(userId);
+
+    const sessions = await Promise.all(
+      sessionIds.map(async (sessionId) => {
+        const data = await this.get(sessionId);
+        if (!data) return null;
+
+        const device = this.describeUserAgent(data.userAgent);
+        return {
+          ...data,
+          sessionId,
+          isCurrent: currentSessionId ? sessionId === currentSessionId : false,
+          deviceName: device.deviceName,
+          browser: device.browser,
+          platform: device.platform,
+          location: data.ip ? `IP ${data.ip}` : undefined,
+          lastActiveAt: lastActive?.timestamp,
+        };
+      }),
+    );
+
+    return sessions
+      .filter(Boolean)
+      .sort((a, b) => b.createdAt - a.createdAt) as SessionOverview[];
   }
 
   async listActiveUserIds(): Promise<string[]> {

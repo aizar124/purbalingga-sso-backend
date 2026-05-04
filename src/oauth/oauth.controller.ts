@@ -117,6 +117,7 @@ export class OAuthController {
   @UseGuards(JwtAuthGuard)
   async userInfo(@Req() req: Request) {
     const user = await this.usersService.findById((req.user as any).id);
+    const lastActive = await this.sessionsService.getLastActive(user.id);
     return {
       sub:       user.id,
       email:     user.email,
@@ -130,6 +131,8 @@ export class OAuthController {
       city:      user.city,
       bio:       user.bio,
       gender:    user.gender,
+      lastLoginAt: lastActive?.timestamp ? new Date(lastActive.timestamp).toISOString() : null,
+      lastActiveAt: lastActive?.timestamp ? new Date(lastActive.timestamp).toISOString() : null,
     };
   }
 
