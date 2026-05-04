@@ -100,14 +100,17 @@ let OAuthService = class OAuthService {
             throw new common_1.NotFoundException('User tidak ditemukan');
         const client = await this.clientsService.findByClientId(authCode.clientId);
         const [accessToken, idToken, refreshToken] = await Promise.all([
-            this.tokenService.generateAccessToken(user, client, authCode.scopes),
+            this.tokenService.generateAccessToken(user, client, authCode.scopes, body.sessionId),
             this.tokenService.generateIdToken(user, client, authCode.nonce),
-            this.tokenService.generateRefreshToken(user.id, client.clientId),
+            this.tokenService.generateRefreshToken(user.id, client.clientId, body.sessionId),
         ]);
+        if (body.sessionId) {
+            await this.sessionsService.registerAccessToken(body.sessionId, accessToken.jti);
+        }
         await this.saveConsent(user.id, client.clientId, authCode.scopes);
         await this.authCodeRepo.delete({ code: body.code });
         return {
-            access_token: accessToken,
+            access_token: accessToken.token,
             token_type: 'Bearer',
             expires_in: 900,
             refresh_token: refreshToken,
@@ -124,10 +127,13 @@ let OAuthService = class OAuthService {
         if (!user || !client)
             throw new common_1.NotFoundException('User atau client tidak ditemukan');
         await this.sessionsService.deleteRefreshToken(refreshToken);
-        const newRefreshToken = await this.tokenService.generateRefreshToken(user.id, client.clientId);
-        const accessToken = await this.tokenService.generateAccessToken(user, client, client.allowedScopes);
+        const accessTokenResult = await this.tokenService.generateAccessToken(user, client, client.allowedScopes, data.sessionId);
+        const newRefreshToken = await this.tokenService.generateRefreshToken(user.id, client.clientId, data.sessionId);
+        if (data.sessionId) {
+            await this.sessionsService.registerAccessToken(data.sessionId, accessTokenResult.jti);
+        }
         return {
-            access_token: accessToken,
+            access_token: accessTokenResult.token,
             token_type: 'Bearer',
             expires_in: 900,
             refresh_token: newRefreshToken,

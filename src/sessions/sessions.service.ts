@@ -26,9 +26,13 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
   private redis: Redis;
   private readonly SESSION_PREFIX  = 'sso_session:';
   private readonly USER_SESSIONS   = 'user_sessions:'; // Set of sessionIds per user
+  private readonly SESSION_TOKENS  = 'session_tokens:'; // Set of access-token jti per session
+  private readonly SESSION_REFRESH_TOKENS = 'session_refresh_tokens:'; // Set of refresh tokens per session
+  private readonly REVOKED_JTI     = 'revoked_access_jti:';
   private readonly ACTIVE_USERS    = 'active_users';
   private readonly LAST_ACTIVE     = 'last_active:';
   private readonly SESSION_TTL_SEC = 60 * 60 * 24 * 7; // 7 hari
+  private readonly REVOKED_TTL_SEC = 60 * 60 * 24; // simpan blacklist 24 jam
 
   onModuleInit() {
     this.redis = new Redis({
@@ -74,6 +78,8 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
   async destroy(sessionId: string): Promise<void> {
     const session = await this.get(sessionId);
     if (session) {
+      await this.revokeSessionAccessTokens(sessionId);
+      await this.revokeSessionRefreshTokens(sessionId);
       await this.redis.srem(this.USER_SESSIONS + session.userId, sessionId);
       const sessionIds = await this.redis.smembers(this.USER_SESSIONS + session.userId);
       if (sessionIds.length === 0) {
@@ -88,7 +94,11 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
     const sessionIds = await this.redis.smembers(this.USER_SESSIONS + userId);
     const pipeline = this.redis.pipeline();
     for (const sessionId of sessionIds) {
+      await this.revokeSessionAccessTokens(sessionId);
+      await this.revokeSessionRefreshTokens(sessionId);
       pipeline.del(this.SESSION_PREFIX + sessionId);
+      pipeline.del(this.SESSION_TOKENS + sessionId);
+      pipeline.del(this.SESSION_REFRESH_TOKENS + sessionId);
     }
     pipeline.del(this.USER_SESSIONS + userId);
     pipeline.srem(this.ACTIVE_USERS, userId);
@@ -166,6 +176,33 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
       .sort((a, b) => b.createdAt - a.createdAt) as SessionOverview[];
   }
 
+  async registerAccessToken(sessionId: string, jti: string): Promise<void> {
+    await this.redis.sadd(this.SESSION_TOKENS + sessionId, jti);
+    await this.redis.expire(this.SESSION_TOKENS + sessionId, this.SESSION_TTL_SEC);
+  }
+
+  async revokeAccessToken(jti: string): Promise<void> {
+    await this.redis.setex(this.REVOKED_JTI + jti, this.REVOKED_TTL_SEC, '1');
+  }
+
+  async isAccessTokenRevoked(jti?: string): Promise<boolean> {
+    if (!jti) {
+      return true;
+    }
+
+    return Boolean(await this.redis.get(this.REVOKED_JTI + jti));
+  }
+
+  async revokeSessionAccessTokens(sessionId: string): Promise<void> {
+    const jtis = await this.redis.smembers(this.SESSION_TOKENS + sessionId);
+    if (jtis.length > 0) {
+      for (const jti of jtis) {
+        await this.revokeAccessToken(jti);
+      }
+    }
+    await this.redis.del(this.SESSION_TOKENS + sessionId);
+  }
+
   async listActiveUserIds(): Promise<string[]> {
     return this.redis.smembers(this.ACTIVE_USERS);
   }
@@ -199,13 +236,19 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   // Simpan refresh token di Redis
-  async saveRefreshToken(token: string, payload: { userId: string; clientId: string }): Promise<void> {
+  async saveRefreshToken(
+    token: string,
+    payload: { userId: string; clientId: string; sessionId?: string },
+  ): Promise<void> {
     const ttl = 60 * 60 * 24 * 30; // 30 hari
     await this.redis.setex(`refresh:${token}`, ttl, JSON.stringify(payload));
+    if (payload.sessionId) {
+      await this.registerRefreshToken(payload.sessionId, token);
+    }
   }
 
   // Ambil data refresh token
-  async getRefreshToken(token: string): Promise<{ userId: string; clientId: string } | null> {
+  async getRefreshToken(token: string): Promise<{ userId: string; clientId: string; sessionId?: string } | null> {
     const raw = await this.redis.get(`refresh:${token}`);
     if (!raw) return null;
     return JSON.parse(raw);
@@ -213,7 +256,26 @@ export class SessionsService implements OnModuleInit, OnModuleDestroy {
 
   // Hapus refresh token (setelah dipakai / logout)
   async deleteRefreshToken(token: string): Promise<void> {
+    const payload = await this.getRefreshToken(token);
+    if (payload?.sessionId) {
+      await this.redis.srem(this.SESSION_REFRESH_TOKENS + payload.sessionId, token);
+    }
     await this.redis.del(`refresh:${token}`);
+  }
+
+  async registerRefreshToken(sessionId: string, token: string): Promise<void> {
+    await this.redis.sadd(this.SESSION_REFRESH_TOKENS + sessionId, token);
+    await this.redis.expire(this.SESSION_REFRESH_TOKENS + sessionId, this.SESSION_TTL_SEC);
+  }
+
+  async revokeSessionRefreshTokens(sessionId: string): Promise<void> {
+    const tokens = await this.redis.smembers(this.SESSION_REFRESH_TOKENS + sessionId);
+    if (tokens.length > 0) {
+      for (const token of tokens) {
+        await this.redis.del(`refresh:${token}`);
+      }
+    }
+    await this.redis.del(this.SESSION_REFRESH_TOKENS + sessionId);
   }
 
   // Simpan authorization code sementara (10 menit)

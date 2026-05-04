@@ -98,6 +98,7 @@ export class OAuthService {
     client_id: string;
     client_secret?: string;
     redirect_uri: string;
+    sessionId?: string;
   }) {
     // 1. Ambil auth code dari DB
     const authCode = await this.authCodeRepo.findOne({
@@ -149,10 +150,14 @@ export class OAuthService {
 
     // 6. Generate tokens
     const [accessToken, idToken, refreshToken] = await Promise.all([
-      this.tokenService.generateAccessToken(user, client, authCode.scopes),
+      this.tokenService.generateAccessToken(user, client, authCode.scopes, body.sessionId),
       this.tokenService.generateIdToken(user, client, authCode.nonce),
-      this.tokenService.generateRefreshToken(user.id, client.clientId),
+      this.tokenService.generateRefreshToken(user.id, client.clientId, body.sessionId),
     ]);
+
+    if (body.sessionId) {
+      await this.sessionsService.registerAccessToken(body.sessionId, accessToken.jti);
+    }
 
     await this.saveConsent(user.id, client.clientId, authCode.scopes);
 
@@ -160,7 +165,7 @@ export class OAuthService {
     await this.authCodeRepo.delete({ code: body.code });
 
     return {
-      access_token:  accessToken,
+      access_token:  accessToken.token,
       token_type:    'Bearer',
       expires_in:    900, // 15 menit dalam detik
       refresh_token: refreshToken,
@@ -180,11 +185,15 @@ export class OAuthService {
 
     // Rotate refresh token (hapus lama, buat baru)
     await this.sessionsService.deleteRefreshToken(refreshToken);
-    const newRefreshToken = await this.tokenService.generateRefreshToken(user.id, client.clientId);
-    const accessToken     = await this.tokenService.generateAccessToken(user, client, client.allowedScopes);
+    const accessTokenResult = await this.tokenService.generateAccessToken(user, client, client.allowedScopes, data.sessionId);
+    const newRefreshToken = await this.tokenService.generateRefreshToken(user.id, client.clientId, data.sessionId);
+
+    if (data.sessionId) {
+      await this.sessionsService.registerAccessToken(data.sessionId, accessTokenResult.jti);
+    }
 
     return {
-      access_token:  accessToken,
+      access_token:  accessTokenResult.token,
       token_type:    'Bearer',
       expires_in:    900,
       refresh_token: newRefreshToken,

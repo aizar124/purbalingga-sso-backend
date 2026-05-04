@@ -219,6 +219,7 @@ https://apisso.qode.my.id/oauth/authorize?
 - `GET /sessions` mengembalikan `{ sessions, total, currentSessionId, lastLoginAt, lastActiveAt, latestSessionId }`.
 - `GET /consent` mengembalikan nama aplikasi melalui `clientName` agar daftar aplikasi terhubung lebih mudah dibaca.
 - Setiap token exchange yang sukses akan menyimpan consent ke tabel `consents`.
+- Logout sesi sekarang mencabut access token JWT dan refresh token yang terkait dengan session tersebut melalui Redis blacklist.
 
 ---
 

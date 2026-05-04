@@ -18,7 +18,9 @@ export class TokenService {
     user: User,
     client: OAuthClient,
     scopes: string[],
-  ): Promise<string> {
+    sessionId?: string,
+  ): Promise<{ token: string; jti: string }> {
+    const jti = uuidv4();
     const payload = {
       sub:       user.id,
       email:     user.email,
@@ -26,14 +28,18 @@ export class TokenService {
       role:      user.role,
       scopes,
       client_id: client.clientId,
+      sid:       sessionId,
       iss:       process.env.SSO_BASE_URL || 'https://apisso.qode.my.id',
       aud:       client.clientId,
-      jti:       uuidv4(), // JWT ID unik, bisa dipakai untuk revocation
+      jti,
     };
 
-    return this.jwtService.sign(payload, {
+    return {
+      token: this.jwtService.sign(payload, {
       expiresIn: process.env.JWT_ACCESS_EXPIRES || '15m',
-    });
+      }),
+      jti,
+    };
   }
 
   // ─── ID Token (OIDC, berisi klaim identitas user) ─────────────────────────
@@ -57,9 +63,9 @@ export class TokenService {
   }
 
   // ─── Refresh Token (UUID random, disimpan di Redis) ───────────────────────
-  async generateRefreshToken(userId: string, clientId: string): Promise<string> {
+  async generateRefreshToken(userId: string, clientId: string, sessionId?: string): Promise<string> {
     const token = crypto.randomBytes(40).toString('hex');
-    await this.sessionsService.saveRefreshToken(token, { userId, clientId });
+    await this.sessionsService.saveRefreshToken(token, { userId, clientId, sessionId });
     return token;
   }
 

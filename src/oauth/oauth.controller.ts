@@ -93,7 +93,7 @@ export class OAuthController {
   // Exchange authorization code → access token (dipanggil server-side client)
   @Post('oauth/token')
   @HttpCode(HttpStatus.OK)
-  async token(@Body() body: TokenDto) {
+  async token(@Body() body: TokenDto, @Req() req: Request) {
     if (body.grant_type === 'authorization_code') {
       return this.oauthService.exchangeCode({
         code:          body.code,
@@ -101,6 +101,7 @@ export class OAuthController {
         client_id:     body.client_id,
         client_secret: body.client_secret,
         redirect_uri:  body.redirect_uri,
+        sessionId: req.cookies?.['sso_session'],
       });
     }
 

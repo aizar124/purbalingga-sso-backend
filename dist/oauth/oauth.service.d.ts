@@ -25,6 +25,7 @@ export declare class OAuthService {
         client_id: string;
         client_secret?: string;
         redirect_uri: string;
+        sessionId?: string;
     }): Promise<{
         access_token: string;
         token_type: string;
