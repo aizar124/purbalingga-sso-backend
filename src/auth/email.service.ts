@@ -1,21 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend | null;
   private mailEnabled: boolean;
 
   constructor() {
-    this.mailEnabled = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    const apiKey = process.env.RESEND_API_KEY;
+
+    this.mailEnabled = Boolean(apiKey);
+    this.resend = apiKey ? new Resend(apiKey) : null;
   }
 
   private getSsoBaseUrl(): string {
@@ -28,14 +23,14 @@ export class EmailService {
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     if (!this.mailEnabled) {
-      console.warn(`SMTP belum dikonfigurasi, skip verification email untuk ${email}`);
+      console.warn(`Resend belum dikonfigurasi, skip verification email untuk ${email}`);
       return;
     }
 
     const verifyUrl = `${this.getSsoBaseUrl()}/auth/verify-email?token=${token}`;
 
-    await this.transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@purbalingga.id',
+    const { error } = await this.resend!.emails.send({
+      from: process.env.RESEND_FROM || 'Purbalingga Akun <noreply@purbalingga.id>',
       to: email,
       subject: 'Verifikasi Email - Purbalingga Akun',
       html: `
@@ -56,18 +51,26 @@ export class EmailService {
         </div>
       `,
     });
+
+    if (error) {
+      throw new Error(
+        typeof error === 'string'
+          ? error
+          : `Gagal mengirim verification email via Resend: ${JSON.stringify(error)}`,
+      );
+    }
   }
 
   async sendResetPasswordEmail(email: string, token: string): Promise<void> {
     if (!this.mailEnabled) {
-      console.warn(`SMTP belum dikonfigurasi, skip reset email untuk ${email}`);
+      console.warn(`Resend belum dikonfigurasi, skip reset email untuk ${email}`);
       return;
     }
 
     const resetUrl = `${this.getFrontendUrl()}/reset-password?token=${token}`;
 
-    await this.transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@purbalingga.id',
+    const { error } = await this.resend!.emails.send({
+      from: process.env.RESEND_FROM || 'Purbalingga Akun <noreply@purbalingga.id>',
       to: email,
       subject: 'Reset Password - Purbalingga Akun',
       html: `
@@ -88,5 +91,13 @@ export class EmailService {
         </div>
       `,
     });
+
+    if (error) {
+      throw new Error(
+        typeof error === 'string'
+          ? error
+          : `Gagal mengirim reset password email via Resend: ${JSON.stringify(error)}`,
+      );
+    }
   }
 }

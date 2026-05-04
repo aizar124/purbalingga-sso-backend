@@ -64,7 +64,15 @@ JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
 
 SSO_BASE_URL=https://apisso.qode.my.id
 FRONTEND_URL=https://sso.qode.my.id
+
+RESEND_API_KEY=<Resend API key>
+RESEND_FROM=Purbalingga Akun <noreply@purbalingga.id>
 ```
+
+Catatan mail:
+- Ini memakai Resend production API, bukan Mailtrap atau SMTP testing.
+- `RESEND_API_KEY` wajib diisi dari dashboard Resend.
+- `RESEND_FROM` harus memakai sender/domain yang sudah diverifikasi di Resend.
 
 ### 4. Buat Database MySQL
 
